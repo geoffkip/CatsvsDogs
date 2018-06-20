@@ -1,6 +1,7 @@
 # import the necessary packages
 import numpy
 from keras.datasets import mnist
+from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import Dropout
@@ -17,6 +18,8 @@ TRAIN_DIR = '/Users/geoffrey.kip/Projects/cats_vs_dogs_keras/train'
 TEST_DIR = '/Users/geoffrey.kip/Projects/cats_vs_dogs_keras/test'
 IMG_SIZE = 50
 LR = 1e-3
+
+MODEL_NAME = 'dogsvscats-{}-{}.model'.format(LR, '2conv-basic') 
 
 def label_img(img):
     word_label = img.split('.')[-3]
@@ -52,4 +55,28 @@ def process_test_data():
     np.save('test_data.npy', testing_data)
     return testing_data
 
+#Show train data cat image
+img = load_img('/Users/geoffrey.kip/Projects/cats_vs_dogs_keras/train/cat.0.jpg')  # this is a PIL image
+img.show()
+
 train_data = create_train_data()
+test_data= process_test_data()
+
+if os.path.exists('{}.meta'.format(MODEL_NAME)):
+    model.load(MODEL_NAME)
+    print('model loaded!')
+
+#Split train and test datasets
+train = train_data[:-500]
+test = train_data[-500:]
+
+X = np.array([i[0] for i in train]).reshape(-1,IMG_SIZE,IMG_SIZE,1)
+Y = [i[1] for i in train]
+
+test_x = np.array([i[0] for i in test]).reshape(-1,IMG_SIZE,IMG_SIZE,1)
+test_y = [i[1] for i in test]
+
+model= cats_dogs_nn()
+
+model.fit({'input': X}, {'targets': Y}, n_epoch=3, validation_set=({'input': test_x}, {'targets': test_y}), 
+    snapshot_step=500, show_metric=True, run_id=MODEL_NAME)
