@@ -59,24 +59,33 @@ def process_test_data():
 img = load_img('/Users/geoffrey.kip/Projects/cats_vs_dogs_keras/train/cat.0.jpg')  # this is a PIL image
 img.show()
 
-train_data = create_train_data()
-test_data= process_test_data()
+#train_data = create_train_data()
+#test_data= process_test_data()
+
+train_data = np.load('train_data.npy')
+test_data = np.load('test_data.npy')
+
+train = train_data[:-500]
+test = train_data[-500:]
+
+X_train = np.array([i[0] for i in train]).reshape(-1,IMG_SIZE,IMG_SIZE,1)
+Y_train = [i[1] for i in train]
+
+X_test = np.array([i[0] for i in test]).reshape(-1,IMG_SIZE,IMG_SIZE,1)
+Y_test = [i[1] for i in test]
 
 if os.path.exists('{}.meta'.format(MODEL_NAME)):
     model.load(MODEL_NAME)
     print('model loaded!')
 
-#Split train and test datasets
-train = train_data[:-500]
-test = train_data[-500:]
+tf_model= cats_dogs_nn.build_tf()
+keras_model= cats_dogs_nn.build_keras()
 
-X = np.array([i[0] for i in train]).reshape(-1,IMG_SIZE,IMG_SIZE,1)
-Y = [i[1] for i in train]
-
-test_x = np.array([i[0] for i in test]).reshape(-1,IMG_SIZE,IMG_SIZE,1)
-test_y = [i[1] for i in test]
-
-model= cats_dogs_nn()
-
-model.fit({'input': X}, {'targets': Y}, n_epoch=3, validation_set=({'input': test_x}, {'targets': test_y}), 
+tf_model.fit({'input': X_train}, {'targets': Y_train}, n_epoch=3, validation_set=({'input': X_test}, {'targets': Y_test}), 
     snapshot_step=500, show_metric=True, run_id=MODEL_NAME)
+
+keras_model.fit(X_train, Y_train,
+          batch_size=100,
+          epochs=10,
+          verbose=1,
+          validation_data=(X_test, Y_test))
