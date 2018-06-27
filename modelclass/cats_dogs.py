@@ -14,27 +14,36 @@ from tflearn.layers.estimator import regression
 
 class cats_dogs_nn:
 	@staticmethod
-	def build_keras():
+	def build_keras(width, height, depth, classes):
+		# initialize the model
 		model = Sequential()
-		# Add convulation
-		model.add(Conv2D(32, (3,3), input_shape = (50,50,1),activation = 'relu'))
+		inputShape = (height, width, depth)
 
-		# Add pooling layer
-		model.add(MaxPooling2D(pool_size = (2,2)))
+		# if we are using "channels first", update the input shape
+		if K.image_data_format() == "channels_first":
+			inputShape = (depth, height, width)
 
-		# Add second convulational layer
-		model.add(Conv2D(32, (3,3), activation = 'relu'))
-		model.add(MaxPooling2D(pool_size = (2,2)))
+		# first set of CONV => RELU => POOL layers
+		model.add(Conv2D(20, (5, 5), padding="same",
+			input_shape=inputShape))
+		model.add(Activation("relu"))
+		model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 
-		# Flattening
+		# second set of CONV => RELU => POOL layers
+		model.add(Conv2D(50, (5, 5), padding="same"))
+		model.add(Activation("relu"))
+		model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+
+		# first (and only) set of FC => RELU layers
 		model.add(Flatten())
+		model.add(Dense(500))
+		model.add(Activation("relu"))
 
-		# Full connection and output layer
-		model.add(Dense(units = 128, activation= 'relu'))
-		model.add(Dense(units= 1 , activation = 'sigmoid'))
+		# softmax classifier
+		model.add(Dense(classes))
+		model.add(Activation("softmax"))
 
-		# Compile the CNN model
-		model.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
+		# return the constructed network architecture
 		return model
 
 	@staticmethod
