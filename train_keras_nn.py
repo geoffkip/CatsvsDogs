@@ -59,6 +59,9 @@ labels = np.array(labels)
 trainY = to_categorical(trainY, num_classes=2)
 testY = to_categorical(testY, num_classes=2)
 
+plt.imshow(trainX[0],cmap='gray')
+print(trainY[0]) # Should be 0 for dog
+
 aug = ImageDataGenerator(rotation_range=30, width_shift_range=0.1,
 	height_shift_range=0.1, shear_range=0.2, zoom_range=0.2,
 	horizontal_flip=True, fill_mode="nearest")
