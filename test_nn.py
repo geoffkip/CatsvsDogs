@@ -32,7 +32,7 @@ print("[INFO] loading network...")
 model = load_model('/Users/geoffrey.kip/Projects/cats_vs_dogs_keras/dogs_vs_cats_keras_nn')
 
 # classify the input image
-(Cat, Dog) = model.predict(image)[0]
+(Dog, Cat) = model.predict(image)[0]
 
 # build the label
 label = "Cat" if Cat > Dog else "Dog"
